@@ -17,3 +17,8 @@
 # Zstd
 -keep class com.github.luben.zstd.** { *; }
 -dontwarn com.github.luben.zstd.**
+
+# junrar / logging facades pulled in by archive libs (no android binding shipped)
+-dontwarn org.slf4j.**
+-dontwarn org.apache.commons.logging.**
+-dontwarn org.apache.log4j.**
