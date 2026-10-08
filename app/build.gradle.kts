@@ -29,6 +29,9 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            // Test signing with debug key so CI release APKs are adb-installable.
+            // Replace with a real release keystore before any store/publish build.
+            signingConfig = signingConfigs.getByName("debug")
         }
         debug {
             isDebuggable = true
