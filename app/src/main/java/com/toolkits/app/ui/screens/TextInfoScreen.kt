@@ -16,8 +16,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
-import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -53,7 +51,7 @@ private fun isEmoji(cp: Int): Boolean =
     (cp in 0x2300..0x23FF) || (cp in 0x1F000..0x1F02F) || (cp in 0x1F0A0..0x1F0FF)
 
 // Port of Toolkits-VIEW TextInfoActivity.
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun TextInfoScreen(onBack: () -> Unit, onViewFile: (uri: String, name: String) -> Unit) {
     val context = LocalContext.current
@@ -101,7 +99,7 @@ fun TextInfoScreen(onBack: () -> Unit, onViewFile: (uri: String, name: String) -
     }
 
     Scaffold(topBar = {
-        CenterAlignedTopAppBar(title = { Text("Text Info") }, navigationIcon = { IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, null) } })
+        com.toolkits.app.ui.components.ToolkitsTopBar(title = "Text Info", onBack = onBack)
     }) { pad ->
         Column(Modifier.fillMaxSize().padding(pad).padding(16.dp).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Button(onClick = { picker.launch(arrayOf("text/*", "application/json", "application/xml", "*/*")) }, modifier = Modifier.fillMaxWidth()) {

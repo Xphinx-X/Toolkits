@@ -11,8 +11,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -36,7 +34,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 // Port of Toolkits-VIEW FileEditorActivity: atomic tmp+rename save, unsaved guard.
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FileEditorScreen(onBack: () -> Unit, filePath: String) {
     var text by remember { mutableStateOf("") }
@@ -87,9 +84,9 @@ fun FileEditorScreen(onBack: () -> Unit, filePath: String) {
     }
 
     Scaffold(topBar = {
-        CenterAlignedTopAppBar(
-            title = { Text(File(filePath).name.ifBlank { "Editor" }) },
-            navigationIcon = { IconButton(onClick = { if (dirty) showDiscard = true else onBack() }) { Icon(Icons.AutoMirrored.Filled.ArrowBack, null) } },
+        com.toolkits.app.ui.components.ToolkitsTopBar(
+            title = File(filePath).name.ifBlank { "Editor" },
+            onBack = { if (dirty) showDiscard = true else onBack() },
             actions = {
                 TextButton(onClick = { save {} }, enabled = dirty) { Text("Save") }
             }

@@ -19,8 +19,6 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -42,7 +40,7 @@ import androidx.compose.ui.unit.sp
 import com.toolkits.app.helper.FancyTextStyles
 
 // Port of Toolkits-VIEW FancyTextActivity: 51 styles, Discord filter, symbol grid, copy.
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun FancyTextScreen(onBack: () -> Unit) {
     var input by remember { mutableStateOf("Hello Toolkits") }
@@ -56,7 +54,7 @@ fun FancyTextScreen(onBack: () -> Unit) {
     }
 
     Scaffold(topBar = {
-        CenterAlignedTopAppBar(title = { Text("Fancy Text") }, navigationIcon = { IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, null) } })
+        com.toolkits.app.ui.components.ToolkitsTopBar(title = "Fancy Text", onBack = onBack)
     }) { pad ->
         LazyColumn(Modifier.fillMaxSize().padding(pad).padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             item {

@@ -15,8 +15,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
-import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -44,7 +42,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 // Port of Toolkits-VIEW FileViewerActivity: 50k-line cap, line RV, case-insensitive search.
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FileViewerScreen(onBack: () -> Unit, uriString: String, fileName: String) {
     val context = LocalContext.current
@@ -95,9 +92,9 @@ fun FileViewerScreen(onBack: () -> Unit, uriString: String, fileName: String) {
     }
 
     Scaffold(topBar = {
-        CenterAlignedTopAppBar(
-            title = { Text(if (fileName.isNotBlank()) fileName else "File Viewer") },
-            navigationIcon = { IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, null) } }
+        com.toolkits.app.ui.components.ToolkitsTopBar(
+            title = if (fileName.isNotBlank()) fileName else "File Viewer",
+            onBack = onBack
         )
     }) { pad ->
         Column(Modifier.fillMaxSize().padding(pad)) {

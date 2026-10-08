@@ -16,12 +16,10 @@ import androidx.compose.material.icons.filled.CreateNewFolder
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.DriveFileRenameOutline
 import androidx.compose.material.icons.filled.Folder
-import androidx.compose.material.icons.filled.InsertDriveFile
+import androidx.compose.material.icons.automirrored.filled.InsertDriveFile
 import androidx.compose.material.icons.filled.NoteAdd
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
@@ -181,9 +179,9 @@ fun ProjectsScreen(onBack: () -> Unit, onOpenEditor: (String) -> Unit) {
     }
 
     Scaffold(topBar = {
-        CenterAlignedTopAppBar(
-            title = { Text("Projects") },
-            navigationIcon = { IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, null) } },
+        com.toolkits.app.ui.components.ToolkitsTopBar(
+            title = "Projects",
+            onBack = onBack,
             actions = {
                 IconButton(onClick = { showNewFile = true }) { Icon(Icons.Filled.NoteAdd, null) }
             }
@@ -202,7 +200,7 @@ fun ProjectsScreen(onBack: () -> Unit, onOpenEditor: (String) -> Unit) {
                     ListItem(
                         headlineContent = { Text("${"  ".repeat(pf.depth.coerceAtMost(4))}${pf.name}") },
                         supportingContent = { Text(pf.relativePath, style = MaterialTheme.typography.bodySmall) },
-                        leadingContent = { Icon(if (pf.isDirectory) Icons.Filled.Folder else Icons.Filled.InsertDriveFile, null) },
+                        leadingContent = { Icon(if (pf.isDirectory) Icons.Filled.Folder else Icons.AutoMirrored.Filled.InsertDriveFile, null) },
                         trailingContent = {
                             Row {
                                 if (!pf.isDirectory) IconButton(onClick = { pendingRename = pf; renameText = pf.name }) { Icon(Icons.Filled.DriveFileRenameOutline, null) }
