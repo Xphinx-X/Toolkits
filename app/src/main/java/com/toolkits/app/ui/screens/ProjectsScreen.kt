@@ -49,7 +49,6 @@ import org.json.JSONObject
 // Simplified port of Toolkits-VIEW ProjectsActivity: root dir browser, create/rename/delete,
 // new-file dialog, traversal guard, JSON import (flat + nested).
 @Composable
-@OptIn(ExperimentalMaterial3Api::class)
 fun ProjectsScreen(onBack: () -> Unit, onOpenEditor: (String) -> Unit) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
