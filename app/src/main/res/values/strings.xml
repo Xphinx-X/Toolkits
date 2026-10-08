@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">ToolKits</string>
+
+    <!-- Navigation -->
+    <string name="nav_home">Home</string>
+    <string name="nav_zip_tools">Zip Tools</string>
+    <string name="nav_settings">Settings</string>
+
+    <!-- Tool names -->
+    <string name="tool_zip_tools">Zip Tools</string>
+    <string name="tool_zip_tools_desc">Extract and create archives (ZIP, 7z, TAR, RAR, and more)</string>
+
+    <!-- Zip Tools -->
+    <string name="extract">Extract</string>
+    <string name="archive">Archive</string>
+    <string name="compress">Compress</string>
+    <string name="extract_archive">Extract</string>
+    <string name="create_archive">Compress</string>
+    <string name="extraction_ongoing">Extracting…</string>
+    <string name="extraction_completed">Extraction completed</string>
+    <string name="archive_ongoing">Creating archive…</string>
+    <string name="archive_created">Archive created</string>
+    <string name="cancel">Cancel</string>
+    <string name="error">Error</string>
+    <string name="wrong_password">Wrong password</string>
+    <string name="general_error_msg">An error occurred</string>
+    <string name="no_files_to_archive">No files selected</string>
+    <string name="password">Password</string>
+    <string name="enter_password">Enter password</string>
+    <string name="optional_password">Password (optional)</string>
+    <string name="archive_name">Archive name</string>
+    <string name="destination_path">Destination path</string>
+    <string name="select_files">Select Files</string>
+    <string name="select_destination">Select Destination</string>
+    <string name="compression_method">Compression Method</string>
+    <string name="compression_level">Compression Level</string>
+    <string name="encryption_method">Encryption Method</string>
+    <string name="encryption">Encryption</string>
+    <string name="solid_archive">Solid Archive</string>
+    <string name="compression_format">Compression Format</string>
+
+    <!-- Notification channels -->
+    <string name="extract_archive_notification_name">Archive Extraction</string>
+    <string name="compress_archive_notification_name">Archive Compression</string>
+
+    <!-- File picker -->
+    <string name="select_file_to_extract">Select file to extract</string>
+    <string name="select_files_to_compress">Select files to compress</string>
+    <string name="no_files_selected">No files selected</string>
+    <string name="files_selected">%1$d files selected</string>
+    <string name="archive_file_path">Archive file path</string>
+
+    <!-- Compression formats -->
+    <string name="format_zip">ZIP</string>
+    <string name="format_7z">7z</string>
+    <string name="format_tar">TAR</string>
+    <string name="format_tar_gz">TAR.GZ</string>
+    <string name="format_tar_bz2">TAR.BZ2</string>
+    <string name="format_tar_xz">TAR.XZ</string>
+    <string name="format_tar_zst">TAR.ZST</string>
+    <string name="format_tar_lzma">TAR.LZMA</string>
+
+    <!-- Home screen -->
+    <string name="home_title">ToolKits</string>
+    <string name="home_subtitle">Your offline toolkit</string>
+    <string name="tools_section">Tools</string>
+    <string name="more_tools_coming_soon">More tools coming soon!</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Settings</string>
+    <string name="pref_paths">Paths</string>
+    <string name="pref_default_extract_path">Default extract path</string>
+    <string name="pref_default_archive_path">Default archive path</string>
+    <string name="pref_appearance">Appearance</string>
+    <string name="pref_theme_mode">Theme</string>
+    <string name="pref_color_scheme">Color scheme</string>
+    <string name="pref_about">About</string>
+    <string name="pref_version">Version</string>
+    <string name="pref_developer">Developer</string>
+
+    <!-- Theme modes -->
+    <string name="theme_system">System</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_dark">Dark</string>
+    <string name="theme_amoled">AMOLED</string>
+
+    <!-- Color schemes -->
+    <string name="color_dynamic">Dynamic Color</string>
+    <string name="color_dynamic_desc">Material You colors from your wallpaper</string>
+    <string name="color_green">Green</string>
+    <string name="color_blue">Blue</string>
+    <string name="color_purple">Purple</string>
+    <string name="color_red">Red</string>
+    <string name="color_orange">Orange</string>
+    <string name="color_scheme_desc">Tap a color to switch scheme</string>
+
+    <!-- Path settings -->
+    <string name="pick_folder">Select folder</string>
+    <string name="enter_path_manually">Enter path manually</string>
+    <string name="select_path">Select path</string>
+    <string name="reset_to_default">Reset to default</string>
+    <string name="save">Save</string>
+
+    <!-- Permissions -->
+    <string name="permission_required_title">Storage Permission Required</string>
+    <string name="permission_required">Storage access is required to read and write archive files. Please grant the permission to continue.</string>
+    <string name="grant_permission">Grant Permission</string>
+
+    <!-- Archive type selection -->
+    <string name="select_archive_type">Archive Type</string>
+
+    <!-- Operation results -->
+    <string name="operation_cancelled">Operation cancelled</string>
+    <string name="operation_failed">Operation failed</string>
+    <string name="operation_success">Operation completed successfully</string>
+
+    <!-- Supported formats info -->
+    <string name="supported_extract_formats">Extract: ZIP, 7z, RAR, TAR, GZ, BZ2, XZ, ZST, ISO, CAB, DEB, RPM, DMG, WIM, CHM, LZ4, BR, and more</string>
+    <string name="supported_create_formats">Create: ZIP, 7z, TAR, TAR.GZ, TAR.BZ2, TAR.XZ, TAR.ZST, TAR.LZMA</string>
+
+    <!-- Archive contents -->
+    <string name="archive_contents">Archive Contents</string>
+    <string name="archive_contents_count">%1$d items in archive</string>
+    <string name="expand_collapse">Expand/Collapse</string>
+    <string name="folder">Folder</string>
+    <string name="files_selected_label">Selected Files</string>
+
+    <!-- Theme change -->
+    <string name="theme_change_restart">Theme will apply after restarting the app</string>
+
+    <!-- PDF settings -->
+    <string name="pref_pdf_section">PDF</string>
+    <string name="pref_hd_render">HD zoom quality</string>
+    <string name="pref_hd_render_desc">Re-render pages at higher resolution after zooming. Causes a short delay when zoom settles — disable for instant zoom.</string>
+
+    <!-- Destination labels (auto-resolved, shown in info card) -->
+    <string name="extract_destination_label">Extracting to</string>
+    <string name="archive_destination_label">Saving archive to</string>
+
+    <!-- Split archive -->
+    <string name="split_archive">Split archive</string>
+    <string name="split_size_hint">Size per part</string>
+    <string name="split_unit_kb">KB</string>
+    <string name="split_unit_mb">MB</string>
+    <string name="split_unit_gb">GB</string>
+
+    <!-- Destination card -->
+    <string name="dest_long_press_hint">Hold to edit</string>
+    <string name="path_resolve_error">Could not resolve path. Try entering it manually.</string>
+    <string name="file_not_found">File not found at this path.</string>
+</resources>
