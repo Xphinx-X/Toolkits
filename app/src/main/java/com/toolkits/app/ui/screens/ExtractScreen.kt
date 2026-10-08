@@ -97,7 +97,7 @@ fun ExtractScreen() {
                         z.fileHeaders.map { h -> ArchiveItem(h.fileName, h.fileName, h.uncompressedSize, h.isDirectory, h.lastModifiedTime) }
                     }
                     ext in COMPRESSOR_EXTENSIONS -> listOf(ArchiveItem(f.nameWithoutExtension, f.nameWithoutExtension, f.length(), false, f.lastModified()))
-                    MultipartArchiveHelper.isMultipartArchive(path) -> listOf(ArchiveItem("(multipart — contents resolved at extract)", "", 0, false, 0))
+                    MultipartArchiveHelper.isMultipartArchive(f) -> listOf(ArchiveItem("(multipart — contents resolved at extract)", "", 0, false, 0))
                     else -> listOf(ArchiveItem("(preview via service at extract — ZIP shows full list)", "", f.length(), false, f.lastModified()))
                 }
                 withContext(Dispatchers.Main) { items = found; selected = emptySet(); selectionMode = false; status = "${found.size} entries"; loading = false }
@@ -109,11 +109,15 @@ fun ExtractScreen() {
 
     fun startExtraction() {
         val src = archivePath.ifBlank { status = "Choose an archive first"; return }
+        // Stage like VIEW ExtractFragment: DAO job holds the archive path for the service.
+        val jobId = try { com.toolkits.app.helper.FileOperationsDao(context).addFilesForJob(listOf(src)) }
+        catch (e: Exception) { status = "DB error: ${e.message}"; return }
         val intent = Intent(context, ExtractArchiveService::class.java).apply {
+            putExtra(ServiceConstants.EXTRA_JOB_ID, jobId)
             putExtra(ServiceConstants.EXTRA_ARCHIVE_PATH, src)
             putExtra(ServiceConstants.EXTRA_DESTINATION_PATH, destPath.ifBlank { "" })
             putExtra(ServiceConstants.EXTRA_PASSWORD, password)
-            if (selectionMode && selected.isNotEmpty()) putExtra("selectedPaths", selected.toTypedArray())
+            if (selectionMode && selected.isNotEmpty()) putStringArrayListExtra(ServiceConstants.EXTRA_SELECTED_PATHS, ArrayList(selected))
         }
         if (Build.VERSION.SDK_INT >= 26) ContextCompat.startForegroundService(context, intent) else context.startService(intent)
         status = "Extraction started — see notification."

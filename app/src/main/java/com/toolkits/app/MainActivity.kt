@@ -15,7 +15,7 @@ class MainActivity : ComponentActivity() {
 
     private lateinit var prefs: UserPreferencesRepository
 
-    override fun onCreate(savedInstanceState: Bundle) {
+    override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         prefs = UserPreferencesRepository(applicationContext)
         enableEdgeToEdge()

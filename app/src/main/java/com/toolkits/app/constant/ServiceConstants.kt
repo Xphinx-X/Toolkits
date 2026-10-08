@@ -16,4 +16,5 @@ object ServiceConstants {
     const val EXTRA_USE_APP_NAME_DIR = "use_app_name_dir"
     const val EXTRA_COMPRESSION_FORMAT = "compression_format"
     const val EXTRA_ARCHIVE_PATH = "archivePath"
+    const val EXTRA_SELECTED_PATHS = "extra_selected_paths"
 }

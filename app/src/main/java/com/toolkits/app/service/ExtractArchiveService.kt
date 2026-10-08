@@ -102,7 +102,7 @@ class ExtractArchiveService : Service() {
         val useAppNameDir = intent?.getBooleanExtra(ServiceConstants.EXTRA_USE_APP_NAME_DIR, false) ?: false
         val destinationPath = intent?.getStringExtra(ServiceConstants.EXTRA_DESTINATION_PATH)
         val selectedPaths = intent?.getStringArrayListExtra(
-            com.toolkits.app.fragment.ExtractFragment.EXTRA_SELECTED_PATHS)
+            ServiceConstants.EXTRA_SELECTED_PATHS)
 
         if (jobId == null) {
             stopSelf()

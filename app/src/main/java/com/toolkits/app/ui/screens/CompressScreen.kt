@@ -40,7 +40,6 @@ import com.toolkits.app.service.ArchiveSplitZipService
 import com.toolkits.app.service.ArchiveTarService
 import com.toolkits.app.service.ArchiveZipService
 import java.io.File
-import java.util.UUID
 
 // Compose port of Toolkits-VIEW CompressFragment: format chips, level slider, encryption,
 // solid 7z, split ZIP, TAR variants, dest card, per-format service dispatch.
@@ -84,9 +83,9 @@ fun CompressScreen() {
 
     fun start() {
         if (files.isEmpty()) { status = "Add at least one file"; return }
-        val jobId = UUID.randomUUID().toString()
-        // Stage file list via FileDbHelper path is service-internal; pass first file + extras.
-        // Full multi-file staging reuses original FileOperationsDao pattern inside services.
+        // Stage exactly like VIEW CompressFragment: DAO returns the jobId the service reads.
+        val jobId = try { com.toolkits.app.helper.FileOperationsDao(context).addFilesForJob(files) }
+        catch (e: Exception) { status = "DB error: ${e.message}"; return }
         val dest = destDir.ifBlank { "" }
         val intent = when {
             format == "zip" && split -> Intent(context, ArchiveSplitZipService::class.java).apply {
@@ -98,7 +97,6 @@ fun CompressScreen() {
                 putExtra(ServiceConstants.EXTRA_IS_ENCRYPTED, encrypt)
                 val mult = when (splitUnit) { "KB" -> 1024L; "GB" -> 1024L * 1024L * 1024L; else -> 1024L * 1024L }
                 putExtra(ServiceConstants.EXTRA_SPLIT_SIZE, (splitSize.toLongOrNull() ?: 10) * mult)
-                putExtra("filePaths", files.toTypedArray())
             }
             format == "zip" -> Intent(context, ArchiveZipService::class.java).apply {
                 putExtra(ServiceConstants.EXTRA_JOB_ID, jobId)
@@ -107,7 +105,6 @@ fun CompressScreen() {
                 putExtra(ServiceConstants.EXTRA_COMPRESSION_LEVEL, level)
                 putExtra(ServiceConstants.EXTRA_PASSWORD, password)
                 putExtra(ServiceConstants.EXTRA_IS_ENCRYPTED, encrypt)
-                putExtra("filePaths", files.toTypedArray())
             }
             format == "7z" -> Intent(context, Archive7zService::class.java).apply {
                 putExtra(ServiceConstants.EXTRA_JOB_ID, jobId)
@@ -116,7 +113,6 @@ fun CompressScreen() {
                 putExtra(ServiceConstants.EXTRA_COMPRESSION_LEVEL, level)
                 putExtra(ServiceConstants.EXTRA_PASSWORD, password)
                 putExtra(ServiceConstants.EXTRA_SOLID, solid)
-                putExtra("filePaths", files.toTypedArray())
             }
             else -> Intent(context, ArchiveTarService::class.java).apply {
                 putExtra(ServiceConstants.EXTRA_JOB_ID, jobId)
@@ -124,7 +120,6 @@ fun CompressScreen() {
                 putExtra(ServiceConstants.EXTRA_DESTINATION_PATH, dest)
                 putExtra(ServiceConstants.EXTRA_COMPRESSION_LEVEL, level)
                 putExtra(ServiceConstants.EXTRA_COMPRESSION_FORMAT, tarVariant)
-                putExtra("filePaths", files.toTypedArray())
             }
         }
         if (Build.VERSION.SDK_INT >= 26) ContextCompat.startForegroundService(context, intent) else context.startService(intent)

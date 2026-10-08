@@ -7,7 +7,6 @@ import androidx.compose.material3.MaterialExpressiveTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
-import androidx.compose.material3.expressiveLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
@@ -44,8 +43,9 @@ fun ToolkitsTheme(
             surface = if (themeMode == "amoled") Color.Black else mdSurfaceDark,
             background = if (themeMode == "amoled") Color.Black else mdSurfaceDark
         )
-        else -> expressiveLightColorScheme(
+        else -> lightColorScheme(
             primary = seed,
+            primaryContainer = seed.copy(alpha = 0.18f),
             surfaceContainerLow = mdSurfaceContainerLowLight
         )
     }

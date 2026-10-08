@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="compression_format_entries">
+        <item>TAR Only</item>
+        <item>TAR.GZ (Gzip)</item>
+        <item>TAR.BZ2 (Bzip2)</item>
+        <item>TAR.XZ (XZ)</item>
+        <item>TAR.ZST (Zstandard)</item>
+        <item>TAR.LZMA (LZMA)</item>
+    </string-array>
+    <string-array name="compression_format_values">
+        <item>TAR_ONLY</item>
+        <item>gz</item>
+        <item>bzip2</item>
+        <item>xz</item>
+        <item>zstd</item>
+        <item>lzma</item>
+    </string-array>
+    <string-array name="theme_entries">
+        <item>@string/theme_system</item>
+        <item>@string/theme_light</item>
+        <item>@string/theme_dark</item>
+    </string-array>
+    <string-array name="theme_values">
+        <item>system</item>
+        <item>light</item>
+        <item>dark</item>
+    </string-array>
+</resources>

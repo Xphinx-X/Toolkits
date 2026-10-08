@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+        Default (Green) Dark Palette — FALLBACK ONLY
+        ==============================================
+        Same as values/colors.xml — these are the static fallback for
+        when DynamicColors is not available. At runtime, seed-color-based
+        scheme generation overrides all of these automatically.
+    -->
+
+    <!-- Primary -->
+    <color name="md_theme_dark_primary">#88D8AD</color>
+    <color name="md_theme_dark_onPrimary">#003824</color>
+    <color name="md_theme_dark_primaryContainer">#005237</color>
+    <color name="md_theme_dark_onPrimaryContainer">#A4F5C8</color>
+
+    <!-- Secondary -->
+    <color name="md_theme_dark_secondary">#B4CCBC</color>
+    <color name="md_theme_dark_onSecondary">#203529</color>
+    <color name="md_theme_dark_secondaryContainer">#374B3F</color>
+    <color name="md_theme_dark_onSecondaryContainer">#D0E8D7</color>
+
+    <!-- Tertiary -->
+    <color name="md_theme_dark_tertiary">#A3CDDB</color>
+    <color name="md_theme_dark_onTertiary">#033641</color>
+    <color name="md_theme_dark_tertiaryContainer">#214C58</color>
+    <color name="md_theme_dark_onTertiaryContainer">#BFE9F7</color>
+
+    <!-- Error -->
+    <color name="md_theme_dark_error">#FFB4AB</color>
+    <color name="md_theme_dark_onError">#690005</color>
+    <color name="md_theme_dark_errorContainer">#93000A</color>
+    <color name="md_theme_dark_onErrorContainer">#FFDAD6</color>
+
+    <!-- Background & Surface -->
+    <color name="md_theme_dark_background">#111413</color>
+    <color name="md_theme_dark_onBackground">#E1E3DE</color>
+    <color name="md_theme_dark_surface">#111413</color>
+    <color name="md_theme_dark_onSurface">#E1E3DE</color>
+
+    <!-- Surface Variants -->
+    <color name="md_theme_dark_surfaceVariant">#414942</color>
+    <color name="md_theme_dark_onSurfaceVariant">#C1C9BF</color>
+    <color name="md_theme_dark_outline">#8B938A</color>
+    <color name="md_theme_dark_outlineVariant">#414942</color>
+
+    <!-- Extended Surface -->
+    <color name="md_theme_dark_surfaceDim">#111413</color>
+    <color name="md_theme_dark_surfaceBright">#373A37</color>
+    <color name="md_theme_dark_surfaceContainerLowest">#0C0F0D</color>
+    <color name="md_theme_dark_surfaceContainerLow">#191C1A</color>
+    <color name="md_theme_dark_surfaceContainer">#1D201E</color>
+    <color name="md_theme_dark_surfaceContainerHigh">#282B28</color>
+    <color name="md_theme_dark_surfaceContainerHighest">#333533</color>
+
+    <!-- Inverse -->
+    <color name="md_theme_dark_inverseSurface">#E2E4E0</color>
+    <color name="md_theme_dark_inverseOnSurface">#2E312D</color>
+    <color name="md_theme_dark_inversePrimary">#1B6B4D</color>
+</resources>

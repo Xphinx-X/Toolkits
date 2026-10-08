@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    MD3-correct state-layer ripple colour.
+    Uses colorOnSurface at 8 % opacity so it's always relative to the
+    current surface — adapts to both light and dark themes automatically.
+    Replaces the default android:colorControlHighlight which is a fixed
+    10 % white in dark mode and causes the jarring bright flash on touch.
+-->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:alpha="0.08" android:color="?attr/colorOnSurface" />
+</selector>

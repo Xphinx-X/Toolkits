@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+        Default (Green) Light Palette — FALLBACK ONLY
+        ===============================================
+        These colors are used as the base theme in values/themes.xml.
+        At runtime, App.applyTheme() uses DynamicColorsOptions with
+        setContentBasedSource() to generate a full M3 scheme from a
+        seed color using material-color-utilities. These XML values
+        are only seen on devices where DynamicColors fails to apply.
+    -->
+
+    <!-- Primary -->
+    <color name="md_theme_light_primary">#1B6B4D</color>
+    <color name="md_theme_light_onPrimary">#FFFFFF</color>
+    <color name="md_theme_light_primaryContainer">#A4F5C8</color>
+    <color name="md_theme_light_onPrimaryContainer">#002114</color>
+
+    <!-- Secondary -->
+    <color name="md_theme_light_secondary">#4E6355</color>
+    <color name="md_theme_light_onSecondary">#FFFFFF</color>
+    <color name="md_theme_light_secondaryContainer">#D0E8D7</color>
+    <color name="md_theme_light_onSecondaryContainer">#0B1F14</color>
+
+    <!-- Tertiary -->
+    <color name="md_theme_light_tertiary">#3B6470</color>
+    <color name="md_theme_light_onTertiary">#FFFFFF</color>
+    <color name="md_theme_light_tertiaryContainer">#BFE9F7</color>
+    <color name="md_theme_light_onTertiaryContainer">#001F27</color>
+
+    <!-- Error -->
+    <color name="md_theme_light_error">#BA1A1A</color>
+    <color name="md_theme_light_onError">#FFFFFF</color>
+    <color name="md_theme_light_errorContainer">#FFDAD6</color>
+    <color name="md_theme_light_onErrorContainer">#410002</color>
+
+    <!-- Background & Surface -->
+    <color name="md_theme_light_background">#FBFDF8</color>
+    <color name="md_theme_light_onBackground">#191C1A</color>
+    <color name="md_theme_light_surface">#FBFDF8</color>
+    <color name="md_theme_light_onSurface">#191C1A</color>
+
+    <!-- Surface Variants -->
+    <color name="md_theme_light_surfaceVariant">#DDE5DB</color>
+    <color name="md_theme_light_onSurfaceVariant">#414942</color>
+    <color name="md_theme_light_outline">#717971</color>
+    <color name="md_theme_light_outlineVariant">#C1C9BF</color>
+
+    <!-- Extended Surface -->
+    <color name="md_theme_light_surfaceDim">#DADBD8</color>
+    <color name="md_theme_light_surfaceBright">#FBFDF8</color>
+    <color name="md_theme_light_surfaceContainerLowest">#FFFFFF</color>
+    <color name="md_theme_light_surfaceContainerLow">#F4F6F2</color>
+    <color name="md_theme_light_surfaceContainer">#EEF0EC</color>
+    <color name="md_theme_light_surfaceContainerHigh">#E8EAE6</color>
+    <color name="md_theme_light_surfaceContainerHighest">#E2E4E0</color>
+
+    <!-- Inverse -->
+    <color name="md_theme_light_inverseSurface">#2E312D</color>
+    <color name="md_theme_light_inverseOnSurface">#EFF1EC</color>
+    <color name="md_theme_light_inversePrimary">#88D8AD</color>
+</resources>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Borderless ripple using colorPrimary at 20% opacity.
+    android:radius constrains the circle size — no mask item needed.
+    A mask item with 0-size shape was killing the animation entirely.
+-->
+<ripple xmlns:android="http://schemas.android.com/apk/res/android"
+    android:color="?attr/colorPrimary"
+    android:radius="20dp" />
