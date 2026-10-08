@@ -40,6 +40,7 @@ import com.toolkits.app.service.ArchiveSplitZipService
 import com.toolkits.app.service.ArchiveTarService
 import com.toolkits.app.service.ArchiveZipService
 import java.io.File
+import java.util.UUID
 
 // Compose port of Toolkits-VIEW CompressFragment: format chips, level slider, encryption,
 // solid 7z, split ZIP, TAR variants, dest card, per-format service dispatch.
