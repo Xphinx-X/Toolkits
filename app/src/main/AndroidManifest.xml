@@ -23,7 +23,7 @@
         android:supportsRtl="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-        android:theme="@style/Theme.Toolkits"
+        android:theme="@style/Theme.ToolKits"
         android:enableOnBackInvokedCallback="true"
         tools:targetApi="36">
 
@@ -32,7 +32,7 @@
             android:exported="true"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|smallestScreenSize|uiMode|locale|density|fontScale"
             android:launchMode="singleTop"
-            android:theme="@style/Theme.Toolkits"
+            android:theme="@style/Theme.ToolKits"
             android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
