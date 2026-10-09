@@ -11,8 +11,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -88,13 +90,18 @@ fun FileEditorScreen(onBack: () -> Unit, filePath: String) {
             title = File(filePath).name.ifBlank { "Editor" },
             onBack = { if (dirty) showDiscard = true else onBack() },
             actions = {
-                TextButton(onClick = { save {} }, enabled = dirty) { Text("Save") }
+                FilledTonalButton(onClick = { save {} }, enabled = dirty) { Text("Save") }
             }
         )
     }) { pad ->
         Column(Modifier.fillMaxSize().padding(pad).padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            if (!loaded) Text("Loading…")
-            OutlinedTextField(value = text, onValueChange = { text = it }, modifier = Modifier.fillMaxSize().weight(1f), label = { Text(filePath) })
+            if (!loaded) LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+            OutlinedTextField(
+                value = text,
+                onValueChange = { text = it },
+                modifier = Modifier.fillMaxSize().weight(1f),
+                label = { Text(File(filePath).name.ifBlank { filePath }, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) }
+            )
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
                 OutlinedButton(onClick = { text = original }, enabled = dirty, modifier = Modifier.weight(1f)) { Text("Revert") }
                 Button(onClick = { save {} }, enabled = dirty, modifier = Modifier.weight(1f)) { Text("Save") }

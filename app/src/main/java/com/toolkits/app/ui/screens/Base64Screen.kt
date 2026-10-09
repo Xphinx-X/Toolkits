@@ -12,8 +12,10 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -51,11 +53,21 @@ fun Base64Screen(onBack: () -> Unit) {
             Modifier.fillMaxSize().padding(pad).padding(16.dp).verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.Top
         ) {
-            // Mode toggle — both always clickable (VIEW MaterialButtonToggleGroup).
-            // Never use enabled=false for selection: it looks broken/disabled.
-            Row(Modifier.padding(bottom = 16.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                FilterChip(selected = encodeMode, onClick = { encodeMode = true }, label = { Text("Encode") })
-                FilterChip(selected = !encodeMode, onClick = { encodeMode = false }, label = { Text("Decode") })
+            // Mode toggle — single-choice segmented control (VIEW toggle group).
+            // Both halves always clickable; selection is visual, never disabled.
+            SingleChoiceSegmentedButtonRow(Modifier.padding(bottom = 16.dp)) {
+                SegmentedButton(
+                    selected = encodeMode,
+                    onClick = { encodeMode = true },
+                    shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2),
+                    label = { Text("Encode") }
+                )
+                SegmentedButton(
+                    selected = !encodeMode,
+                    onClick = { encodeMode = false },
+                    shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2),
+                    label = { Text("Decode") }
+                )
             }
 
             OutlinedTextField(

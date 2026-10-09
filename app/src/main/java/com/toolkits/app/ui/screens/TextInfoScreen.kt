@@ -18,6 +18,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -73,6 +74,9 @@ fun TextInfoScreen(
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Text(if (vm.analysing) "Analysing…" else if (vm.hasResult) "Choose Another File" else "Choose File")
+                    }
+                    androidx.compose.animation.AnimatedVisibility(visible = vm.analysing) {
+                        LinearProgressIndicator(modifier = Modifier.fillMaxWidth().padding(top = 12.dp))
                     }
                     if (vm.hasResult) {
                         OutlinedButton(

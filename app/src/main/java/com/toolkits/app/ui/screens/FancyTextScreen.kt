@@ -145,7 +145,14 @@ fun FancyTextScreen(onBack: () -> Unit) {
             }
             OutlinedSectionCard {
                 if (!symbolsReady) {
-                    Text("Loading symbols…", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(16.dp))
+                    Row(
+                        Modifier.fillMaxWidth().padding(16.dp),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        androidx.compose.material3.CircularProgressIndicator(modifier = Modifier.size(20.dp))
+                        Text("Loading symbols…", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
                 } else {
                     val symbols = FancyTextStyles.symbolCategories.firstOrNull { it.name == category }?.symbols ?: emptyList()
                     LazyVerticalGrid(

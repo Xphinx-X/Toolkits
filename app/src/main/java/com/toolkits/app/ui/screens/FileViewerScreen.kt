@@ -105,7 +105,7 @@ fun FileViewerScreen(onBack: () -> Unit, uriString: String, fileName: String) {
         if (matches.isEmpty()) return
         val wrapped = ((index % matches.size) + matches.size) % matches.size
         activeIdx = wrapped
-        scope.launch { listState.scrollToItem(matches[wrapped].first) }
+        scope.launch { listState.animateScrollToItem(matches[wrapped].first) }
     }
 
     // Live search like VIEW TextWatcher + auto-jump to first match.
@@ -126,7 +126,7 @@ fun FileViewerScreen(onBack: () -> Unit, uriString: String, fileName: String) {
         matches = out
         if (out.isNotEmpty()) {
             activeIdx = 0
-            scope.launch { listState.scrollToItem(out[0].first) }
+            scope.launch { listState.animateScrollToItem(out[0].first) }
         } else activeIdx = -1
     }
 
@@ -155,7 +155,8 @@ fun FileViewerScreen(onBack: () -> Unit, uriString: String, fileName: String) {
         snackbarHost = { SnackbarHost(snackbar) }
     ) { pad ->
         Column(Modifier.fillMaxSize().padding(pad)) {
-            if (searchVisible) {
+            androidx.compose.animation.AnimatedVisibility(visible = searchVisible) {
+                Column {
                 Row(Modifier.fillMaxWidth().padding(12.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     OutlinedTextField(
                         value = query,
@@ -178,10 +179,11 @@ fun FileViewerScreen(onBack: () -> Unit, uriString: String, fileName: String) {
                 }
                 Text(
                     if (query.isEmpty()) "0/0" else "${activeIdx + 1}/${matches.size}",
-                    modifier = Modifier.padding(horizontal = 16.dp),
+                    modifier = Modifier.padding(horizontal = 16.dp).padding(bottom = 4.dp),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
+                }
             }
             if (loading) {
                 LinearProgressIndicator(modifier = Modifier.fillMaxWidth())

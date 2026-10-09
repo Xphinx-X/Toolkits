@@ -23,6 +23,7 @@ import androidx.compose.material.icons.filled.DriveFileRenameOutline
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.NoteAdd
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
@@ -281,13 +282,13 @@ fun ProjectsScreen(onBack: () -> Unit, onOpenEditor: (String) -> Unit) {
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-                OutlinedButton(onClick = { folderPicker.launch(null) }, modifier = Modifier.fillMaxWidth()) {
+                Button(onClick = { folderPicker.launch(null) }, modifier = Modifier.fillMaxWidth()) {
                     Icon(Icons.Filled.CreateNewFolder, null, modifier = Modifier.padding(end = 8.dp))
                     Text("Choose folder")
                 }
                 if (recents.isNotEmpty()) {
                     Text("Recent", style = MaterialTheme.typography.titleSmall)
-                    LazyColumn(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                    LazyColumn(modifier = Modifier.fillMaxWidth().weight(1f, fill = false), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                         items(recents, key = { it }) { r ->
                             ListItem(
                                 headlineContent = { Text(File(r).name) },
@@ -326,7 +327,12 @@ fun ProjectsScreen(onBack: () -> Unit, onOpenEditor: (String) -> Unit) {
                     LazyColumn(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                         items(items, key = { it.absolutePath }) { pf ->
                             ListItem(
-                                headlineContent = { Text("${"  ".repeat(pf.depth.coerceAtMost(8))}${pf.name}") },
+                                headlineContent = {
+                                    Text(
+                                        pf.name,
+                                        modifier = Modifier.padding(start = (pf.depth.coerceAtMost(8) * 12).dp)
+                                    )
+                                },
                                 supportingContent = { Text(pf.relativePath, style = MaterialTheme.typography.bodySmall) },
                                 leadingContent = { Icon(if (pf.isDirectory) Icons.Filled.Folder else Icons.AutoMirrored.Filled.InsertDriveFile, null) },
                                 trailingContent = {

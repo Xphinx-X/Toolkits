@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Scaffold
@@ -35,6 +36,7 @@ fun ZipToolsScreen(onBack: () -> Unit, prefs: UserPreferencesRepository) {
                 Tab(selected = tab == 0, onClick = { tab = 0 }, text = { Text(stringResource(R.string.extract)) })
                 Tab(selected = tab == 1, onClick = { tab = 1 }, text = { Text(stringResource(R.string.create_archive)) })
             }
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
             if (tab == 0) ExtractScreen(prefs) else CompressScreen(prefs)
         }
     }

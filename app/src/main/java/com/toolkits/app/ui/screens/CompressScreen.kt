@@ -16,7 +16,12 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
@@ -39,8 +44,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import com.toolkits.app.R
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.toolkits.app.constant.ACTION_ARCHIVE_COMPLETE
 import com.toolkits.app.constant.ACTION_ARCHIVE_ERROR
@@ -222,21 +229,28 @@ fun CompressScreen(prefs: UserPreferencesRepository) {
 
     val maxLevel = if (format == "tar" && tarVariant != "TAR_ONLY") 22 else 9
 
-    Column(Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+    Column(
+        Modifier.fillMaxSize().padding(16.dp).verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             OutlinedButton(onClick = { filePicker.launch(arrayOf("*/*")) }, modifier = Modifier.weight(1f)) { Text("Add files (${files.size})") }
             OutlinedButton(onClick = { folderAddPicker.launch(null) }, modifier = Modifier.weight(1f)) { Text("Add folder") }
             OutlinedButton(onClick = { files = emptyList() }) { Text("Clear") }
         }
-        if (files.isNotEmpty()) {
-            LazyColumn(modifier = Modifier.fillMaxWidth().weight(1f, fill = false), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                items(files, key = { it }) { f ->
-                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                        Column(Modifier.weight(1f)) {
-                            Text(File(f).name, style = MaterialTheme.typography.bodySmall, maxLines = 1)
-                            Text(f, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 2)
+        androidx.compose.animation.AnimatedVisibility(visible = files.isNotEmpty()) {
+            com.toolkits.app.ui.components.OutlinedSectionCard {
+                LazyColumn(modifier = Modifier.fillMaxWidth().heightIn(max = 220.dp).padding(vertical = 4.dp), verticalArrangement = Arrangement.spacedBy(2.dp), userScrollEnabled = true) {
+                    items(files, key = { it }) { f ->
+                        Row(Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 2.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                            Column(Modifier.weight(1f)) {
+                                Text(File(f).name, style = MaterialTheme.typography.bodySmall, maxLines = 1)
+                                Text(f, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 2)
+                            }
+                            IconButton(onClick = { files = files - f }) {
+                                Icon(painterResource(R.drawable.ic_close), contentDescription = "Remove", tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                            }
                         }
-                        OutlinedButton(onClick = { files = files - f }) { Text("×") }
                     }
                 }
             }
@@ -259,22 +273,28 @@ fun CompressScreen(prefs: UserPreferencesRepository) {
             Text("Encrypt (ZIP/7z AES)")
             Switch(checked = encrypt, onCheckedChange = { encrypt = it })
         }
-        if (encrypt) OutlinedTextField(value = password, onValueChange = { password = it }, label = { Text("Archive password") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
-        if (format == "7z") {
+        androidx.compose.animation.AnimatedVisibility(visible = encrypt) {
+            OutlinedTextField(value = password, onValueChange = { password = it }, label = { Text("Archive password") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+        }
+        androidx.compose.animation.AnimatedVisibility(visible = format == "7z") {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text("Solid archive"); Switch(checked = solid, onCheckedChange = { solid = it })
             }
         }
-        if (format == "zip") {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text("Split ZIP"); Switch(checked = split, onCheckedChange = { split = it })
-            }
-            if (split) {
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                    OutlinedTextField(value = splitSize, onValueChange = { splitSize = it }, label = { Text("Part size") }, modifier = Modifier.weight(1f), singleLine = true)
-                    listOf("KB", "MB", "GB").forEach { u -> FilterChip(selected = splitUnit == u, onClick = { splitUnit = u }, label = { Text(u) }) }
+        androidx.compose.animation.AnimatedVisibility(visible = format == "zip") {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text("Split ZIP"); Switch(checked = split, onCheckedChange = { split = it })
                 }
-                Text("Minimum 64KB per part (original rule).", style = MaterialTheme.typography.bodySmall)
+                androidx.compose.animation.AnimatedVisibility(visible = split) {
+                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                            OutlinedTextField(value = splitSize, onValueChange = { splitSize = it }, label = { Text("Part size") }, modifier = Modifier.weight(1f), singleLine = true)
+                            listOf("KB", "MB", "GB").forEach { u -> FilterChip(selected = splitUnit == u, onClick = { splitUnit = u }, label = { Text(u) }) }
+                        }
+                        Text("Minimum 64KB per part (original rule).", style = MaterialTheme.typography.bodySmall)
+                    }
+                }
             }
         }
         OutlinedTextField(value = archiveName, onValueChange = { archiveName = it }, label = { Text("Archive name") }, modifier = Modifier.fillMaxWidth(), singleLine = true)

@@ -1,6 +1,8 @@
 package com.toolkits.app.ui.components
 
 import androidx.annotation.DrawableRes
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -29,6 +31,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.toolkits.app.R
 
@@ -42,7 +45,7 @@ fun ToolkitsTopBar(
     actions: @Composable () -> Unit = {}
 ) {
     TopAppBar(
-        title = { Text(title, style = MaterialTheme.typography.titleLarge) },
+        title = { Text(title, style = MaterialTheme.typography.titleLarge, maxLines = 1, overflow = TextOverflow.Ellipsis) },
         navigationIcon = {
             if (onBack != null) {
                 IconButton(onClick = onBack) {
@@ -128,10 +131,11 @@ fun ToolRowCard(
 
 // Outlined section card mirrors Widget.ToolKits.CardView.Outlined:
 // 16dp corners, 0 elevation, 1dp outlineVariant stroke.
+// animateContentSize gives Zenith-like expand/collapse motion.
 @Composable
 fun OutlinedSectionCard(content: @Composable () -> Unit) {
     OutlinedCard(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth().animateContentSize(),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.outlinedCardColors(containerColor = MaterialTheme.colorScheme.surface),
         border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
@@ -162,11 +166,13 @@ fun CardHeaderRow(
             modifier = Modifier.weight(1f).padding(start = 12.dp),
             style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary
         )
-        Icon(
-            painterResource(if (expanded) R.drawable.ic_chevron_up else R.drawable.ic_expand_more),
-            contentDescription = null,
-            modifier = Modifier.size(24.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant
-        )
+        AnimatedContent(targetState = expanded, label = "chevron") { ex ->
+            Icon(
+                painterResource(if (ex) R.drawable.ic_chevron_up else R.drawable.ic_expand_more),
+                contentDescription = null,
+                modifier = Modifier.size(24.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
     }
 }
 

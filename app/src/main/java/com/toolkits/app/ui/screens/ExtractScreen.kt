@@ -333,7 +333,7 @@ fun ExtractScreen(prefs: UserPreferencesRepository) {
 
         // Contents card — hidden for non-archives / empty.
         val visibleItems = items.filter { it.path.isNotBlank() || it.name.startsWith("(") }
-        if (visibleItems.isNotEmpty()) {
+        androidx.compose.animation.AnimatedVisibility(visible = visibleItems.isNotEmpty()) {
             OutlinedSectionCard {
                 Column {
                     CardHeaderRow(
@@ -342,7 +342,8 @@ fun ExtractScreen(prefs: UserPreferencesRepository) {
                         expanded = contentsExpanded,
                         onToggle = { contentsExpanded = !contentsExpanded }
                     )
-                    if (contentsExpanded) {
+                    androidx.compose.animation.AnimatedVisibility(visible = contentsExpanded) {
+                        Column {
                         CardDivider()
                         LazyColumn(modifier = Modifier.fillMaxWidth().height(360.dp).padding(top = 8.dp, bottom = 12.dp)) {
                             items(visibleItems, key = { it.path.ifBlank { it.name } }) { item ->
@@ -388,11 +389,12 @@ fun ExtractScreen(prefs: UserPreferencesRepository) {
                                 }) { Text("Extract selected") }
                                 TextButton(onClick = { selected = visibleItems.map { it.path }.filter { it.isNotBlank() }.toSet() }) { Text("All", style = MaterialTheme.typography.labelSmall) }
                                 Spacer(Modifier.width(6.dp))
-                                TextButton(onClick = { selected = emptySet() }) { Text("✕", style = MaterialTheme.typography.labelSmall) }
+                                TextButton(onClick = { selected = emptySet() }) { Text("Clear", style = MaterialTheme.typography.labelSmall) }
                             } else {
                                 Text("Tap to select files (optional)", modifier = Modifier.weight(1f), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                                 TextButton(onClick = { selected = visibleItems.map { it.path }.filter { it.isNotBlank() }.toSet() }) { Text("All", style = MaterialTheme.typography.labelSmall) }
                             }
+                        }
                         }
                     }
                 }
@@ -421,13 +423,15 @@ fun ExtractScreen(prefs: UserPreferencesRepository) {
                             style = MaterialTheme.typography.labelMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
-                        Icon(
-                            painterResource(if (destExpanded) R.drawable.ic_chevron_up else R.drawable.ic_expand_more),
-                            contentDescription = null,
-                            modifier = Modifier.size(20.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                        androidx.compose.animation.AnimatedContent(targetState = destExpanded, label = "destChevron") { ex ->
+                            Icon(
+                                painterResource(if (ex) R.drawable.ic_chevron_up else R.drawable.ic_expand_more),
+                                contentDescription = null,
+                                modifier = Modifier.size(20.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                     }
-                    if (destExpanded) {
+                    androidx.compose.animation.AnimatedVisibility(visible = destExpanded) {
                         if (!destEditing) {
                             Row(
                                 Modifier.fillMaxWidth()
