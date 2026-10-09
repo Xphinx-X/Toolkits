@@ -363,6 +363,12 @@ fun ExtractScreen(prefs: UserPreferencesRepository) {
                                         enabled = selectable,
                                         onCheckedChange = { c -> selected = if (c) selected + item.path else selected - item.path }
                                     )
+                                    Icon(
+                                        painterResource(if (item.isDirectory) R.drawable.ic_folder_open else R.drawable.ic_archive),
+                                        contentDescription = null,
+                                        modifier = Modifier.size(20.dp),
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
                                     Column(Modifier.weight(1f).padding(start = 8.dp)) {
                                         Text(item.name, style = MaterialTheme.typography.bodyMedium, maxLines = 2)
                                         if (item.size > 0) Text(
@@ -446,9 +452,6 @@ fun ExtractScreen(prefs: UserPreferencesRepository) {
                                     color = MaterialTheme.colorScheme.onSurface,
                                     maxLines = 3
                                 )
-                                IconButton(onClick = { destDirPicker.launch(null) }) {
-                                    Icon(painterResource(R.drawable.ic_folder_open), contentDescription = "Pick folder", tint = MaterialTheme.colorScheme.primary)
-                                }
                                 Text(
                                     stringResource(R.string.dest_long_press_hint),
                                     style = MaterialTheme.typography.labelSmall,

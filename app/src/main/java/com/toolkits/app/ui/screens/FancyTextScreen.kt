@@ -121,7 +121,7 @@ fun FancyTextScreen(onBack: () -> Unit) {
                         ) {
                             Column(Modifier.weight(1f)) {
                                 // Preview is the hero (18sp), name is the secondary label.
-                                Text(preview, fontSize = 18.sp, maxLines = 2, color = MaterialTheme.colorScheme.onSurface)
+                                Text(preview, style = MaterialTheme.typography.titleMedium.copy(fontSize = 18.sp), maxLines = 2, color = MaterialTheme.colorScheme.onSurface)
                                 Text(style.name, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(top = 3.dp))
                             }
                             IconButton(onClick = { copyText(preview) }, modifier = Modifier.size(44.dp)) {
@@ -163,7 +163,7 @@ fun FancyTextScreen(onBack: () -> Unit) {
                         userScrollEnabled = true
                     ) {
                         items(symbols) { s ->
-                            AssistChip(onClick = { copyText(s) }, label = { Text(s, fontSize = 18.sp) })
+                            AssistChip(onClick = { copyText(s) }, label = { Text(s, style = MaterialTheme.typography.titleMedium.copy(fontSize = 18.sp)) })
                         }
                     }
                 }
