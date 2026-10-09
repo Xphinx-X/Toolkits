@@ -32,7 +32,13 @@ import com.toolkits.app.ui.components.ToolkitsTopBar
 // "Tools" TitleMedium section, 16dp tool cards with direct 48dp icons.
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(onZipTools: () -> Unit, onTextTools: () -> Unit, onSettings: () -> Unit) {
+fun HomeScreen(
+    onZipTools: () -> Unit,
+    onTextTools: () -> Unit,
+    onSettings: () -> Unit,
+    hasStorageAccess: Boolean = true,
+    onGrantStorage: () -> Unit = {}
+) {
     Scaffold(
         topBar = {
             ToolkitsTopBar(
@@ -50,6 +56,31 @@ fun HomeScreen(onZipTools: () -> Unit, onTextTools: () -> Unit, onSettings: () -
             modifier = Modifier.fillMaxSize().padding(pad).padding(16.dp).verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.Top
         ) {
+            // Storage-access banner — without it, /storage paths resolve but
+            // can't be read ("no read access"). Tapping opens system settings.
+            if (!hasStorageAccess) {
+                Card(
+                    onClick = onGrantStorage,
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+                ) {
+                    Column(Modifier.fillMaxWidth().padding(16.dp)) {
+                        Text(
+                            stringResource(R.string.permission_required_title),
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.onErrorContainer
+                        )
+                        Text(
+                            stringResource(R.string.permission_required),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onErrorContainer,
+                            modifier = Modifier.padding(top = 4.dp)
+                        )
+                    }
+                }
+            }
             // Welcome — Widget.ToolKits.CardView.Filled
             Card(
                 modifier = Modifier.fillMaxWidth(),

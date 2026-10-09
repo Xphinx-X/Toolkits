@@ -158,6 +158,11 @@ fun ExtractScreen(prefs: UserPreferencesRepository) {
     fun listArchive(path: String) {
         val f = File(path)
         if (!f.exists() || !f.isFile) return
+        if (!f.canRead()) {
+            items = emptyList(); selected = emptySet()
+            status = "Cannot read file — grant storage access (see Home banner) or re-pick it"
+            return
+        }
         // Non-archives show nothing (VIEW hides the card) — never a stub row.
         if (!SafPathResolver.isArchiveFile(path)) {
             items = emptyList(); selected = emptySet(); status = ""

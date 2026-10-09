@@ -1,11 +1,16 @@
 package com.toolkits.app.ui.navigation
 
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.toolkits.app.R
 import com.toolkits.app.data.preferences.UserPreferencesRepository
 import com.toolkits.app.ui.screens.Base64Screen
 import com.toolkits.app.ui.screens.FancyTextScreen
@@ -19,14 +24,22 @@ import com.toolkits.app.ui.screens.TextToolsHubScreen
 import com.toolkits.app.ui.screens.ZipToolsScreen
 
 @Composable
-fun ToolkitsNavHost(prefs: UserPreferencesRepository) {
+fun ToolkitsNavHost(
+    prefs: UserPreferencesRepository,
+    hasStorageAccess: Boolean,
+    showStorageDialog: Boolean,
+    onDismissStorageDialog: () -> Unit,
+    onGrantStorage: () -> Unit
+) {
     val nav = rememberNavController()
     NavHost(navController = nav, startDestination = Routes.HOME) {
         composable(Routes.HOME) {
             HomeScreen(
                 onZipTools = { nav.navigate(Routes.ZIP_TOOLS) },
                 onTextTools = { nav.navigate(Routes.TEXT_HUB) },
-                onSettings = { nav.navigate(Routes.SETTINGS) }
+                onSettings = { nav.navigate(Routes.SETTINGS) },
+                hasStorageAccess = hasStorageAccess,
+                onGrantStorage = onGrantStorage
             )
         }
         composable(Routes.ZIP_TOOLS) { ZipToolsScreen(onBack = { nav.popBackStack() }, prefs = prefs) }
@@ -67,5 +80,20 @@ fun ToolkitsNavHost(prefs: UserPreferencesRepository) {
         }
         composable(Routes.FANCY) { FancyTextScreen(onBack = { nav.popBackStack() }) }
         composable(Routes.SETTINGS) { SettingsScreen(onBack = { nav.popBackStack() }, prefs = prefs) }
+    }
+
+    // First-launch storage prompt — mirrors VIEW's permission dialog.
+    if (showStorageDialog) {
+        AlertDialog(
+            onDismissRequest = onDismissStorageDialog,
+            title = { Text(stringResource(R.string.permission_required_title)) },
+            text = { Text(stringResource(R.string.permission_required)) },
+            confirmButton = {
+                TextButton(onClick = { onGrantStorage() }) { Text(stringResource(R.string.grant_permission)) }
+            },
+            dismissButton = {
+                TextButton(onClick = onDismissStorageDialog) { Text("Later") }
+            }
+        )
     }
 }

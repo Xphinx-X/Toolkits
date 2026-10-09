@@ -39,10 +39,21 @@ object SafPathResolver {
     fun externalRoot(): String =
         Environment.getExternalStorageDirectory().absolutePath
 
+    /** A resolved path is only usable if the app can actually read it.
+     * exists() alone is not enough: on Android 11+ without all-files access,
+     * /storage paths resolve and exist but throw (e.g. "no read access")
+     * when a library opens them. Unreadable candidates fall through to the
+     * cache copy, which uses the granted URI permission and always works. */
+    private fun readable(path: String?): String? {
+        if (path.isNullOrBlank()) return null
+        val f = File(path)
+        return if (f.exists() && f.canRead()) f.absolutePath else null
+    }
+
     /** 4-step SAF file resolution: direct → docId → /proc fd → cache copy. */
     fun resolveUriToPath(context: Context, uri: Uri): String? {
         try {
-            PathUtils.getPath(context, uri)?.takeIf { File(it).exists() }?.let { return it }
+            readable(try { PathUtils.getPath(context, uri) } catch (_: Exception) { null })?.let { return it }
         } catch (_: Exception) { }
         try {
             if (android.provider.DocumentsContract.isDocumentUri(context, uri)) {
@@ -52,16 +63,15 @@ object SafPathResolver {
                     val rel = docId.substringAfter(":")
                     val base = if (volume.equals("primary", ignoreCase = true))
                         externalRoot() else "/storage/$volume"
-                    val reconstructed = File("$base/$rel")
-                    if (reconstructed.exists()) return reconstructed.absolutePath
+                    readable("$base/$rel")?.let { return it }
                 }
             }
         } catch (_: Exception) { }
         try {
             context.contentResolver.openFileDescriptor(uri, "r")?.use { pfd ->
                 val realPath = File("/proc/self/fd/${pfd.fd}").canonicalPath
-                if (!realPath.startsWith("/proc") && File(realPath).exists()) {
-                    return realPath
+                if (!realPath.startsWith("/proc")) {
+                    readable(realPath)?.let { return it }
                 }
             }
         } catch (_: Exception) { }
@@ -78,11 +88,13 @@ object SafPathResolver {
         } catch (_: Exception) { null }
     }
 
-    /** Tree URI (folder picker) → filesystem path. */
+    /** Tree URI (folder picker) → filesystem path. Rejects candidates that
+     * don't exist so callers show the picker error instead of a dead path. */
     fun treeUriToPath(context: Context, uri: Uri): String? {
         // Try direct first (works for some providers)
         try {
-            PathUtils.getPath(context, uri)?.takeIf { it.isNotBlank() }?.let { return it }
+            val direct = try { PathUtils.getPath(context, uri) } catch (_: Exception) { null }
+            if (!direct.isNullOrBlank() && File(direct).exists()) return direct
         } catch (_: Exception) { }
         return try {
             val documentId: String? = try {
@@ -97,7 +109,8 @@ object SafPathResolver {
                 val rel = documentId.substringAfter(":")
                 val base = if (vol.equals("primary", ignoreCase = true))
                     externalRoot() else "/storage/$vol"
-                if (rel.isEmpty()) base else "$base/$rel"
+                val cand = if (rel.isEmpty()) base else "$base/$rel"
+                if (File(cand).exists()) cand else null
             } else null
         } catch (_: Exception) { null }
     }
