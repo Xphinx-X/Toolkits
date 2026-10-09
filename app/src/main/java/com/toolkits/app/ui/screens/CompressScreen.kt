@@ -1,8 +1,12 @@
 package com.toolkits.app.ui.screens
 
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.net.Uri
 import android.os.Build
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
@@ -17,6 +21,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -24,6 +29,9 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -33,21 +41,32 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import com.toolkits.app.constant.ACTION_ARCHIVE_COMPLETE
+import com.toolkits.app.constant.ACTION_ARCHIVE_ERROR
+import com.toolkits.app.constant.ACTION_ARCHIVE_PROGRESS
+import com.toolkits.app.constant.EXTRA_ERROR_MESSAGE
+import com.toolkits.app.constant.EXTRA_PROGRESS
 import com.toolkits.app.constant.ServiceConstants
-import com.toolkits.app.helper.PathUtils
+import com.toolkits.app.data.preferences.ToolkitsPreferences
+import com.toolkits.app.data.preferences.UserPreferencesRepository
+import com.toolkits.app.helper.SafPathResolver
 import com.toolkits.app.service.Archive7zService
 import com.toolkits.app.service.ArchiveSplitZipService
 import com.toolkits.app.service.ArchiveTarService
 import com.toolkits.app.service.ArchiveZipService
 import java.io.File
-import java.util.UUID
+import net.lingala.zip4j.model.enums.AesKeyStrength
+import net.lingala.zip4j.model.enums.CompressionLevel
+import net.lingala.zip4j.model.enums.CompressionMethod
+import net.lingala.zip4j.model.enums.EncryptionMethod
 
-// Compose port of Toolkits-VIEW CompressFragment: format chips, level slider, encryption,
-// solid 7z, split ZIP, TAR variants, dest card, per-format service dispatch.
+// Compose port of Toolkits-VIEW CompressFragment.
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun CompressScreen() {
+fun CompressScreen(prefs: UserPreferencesRepository) {
     val context = LocalContext.current
+    val prefsState by prefs.preferences.collectAsState(initial = ToolkitsPreferences())
     var files by remember { mutableStateOf<List<String>>(emptyList()) }
     var format by remember { mutableStateOf("zip") } // zip|7z|tar
     var tarVariant by remember { mutableStateOf("gz") } // TAR_ONLY|gz|bzip2|xz|zstd|lzma
@@ -58,85 +77,165 @@ fun CompressScreen() {
     var split by remember { mutableStateOf(false) }
     var splitSize by remember { mutableStateOf("10") }
     var splitUnit by remember { mutableStateOf("MB") } // KB|MB|GB
-    var destDir by remember { mutableStateOf("") }
+    var destCustom by remember { mutableStateOf<String?>(null) }
     var archiveName by remember { mutableStateOf("Archive") }
     var status by remember { mutableStateOf("Add files, choose format, then compress.") }
+    var busy by remember { mutableStateOf(false) }
 
-    val maxLevel = if (format == "tar" && tarVariant != "TAR_ONLY") 22 else 9
-
-    fun resolveUri(uri: Uri): String? {
-        PathUtils.getPath(context, uri)?.takeIf { File(it).exists() }?.let { return it }
-        return try {
-            val name = uri.lastPathSegment?.substringAfterLast('/')?.takeLast(60) ?: "picked_${UUID.randomUUID()}"
-            val out = File(context.cacheDir, name)
-            context.contentResolver.openInputStream(uri)?.use { ins -> out.outputStream().use { ins.copyTo(it) } }
-            out.absolutePath
-        } catch (_: Exception) { null }
+    // Seed encryption toggle from Settings default (once, unless user changed it).
+    var seededEncryption by remember { mutableStateOf(false) }
+    LaunchedEffect(prefsState.zipEncryption) {
+        if (!seededEncryption && prefsState.zipEncryption != "none") {
+            encrypt = true
+            seededEncryption = true
+        }
     }
 
-    val picker = rememberLauncherForActivityResult(ActivityResultContracts.OpenMultipleDocuments()) { uris ->
+    fun resolveArchiveDest(): String {
+        destCustom?.takeIf { it.isNotBlank() }?.let { return it }
+        val base = prefsState.archiveDirPath.ifBlank { SafPathResolver.externalRoot() }
+        val dir = File(base, "Archive")
+        if (!dir.exists()) dir.mkdirs()
+        return dir.absolutePath
+    }
+
+    DisposableEffect(context) {
+        val receiver = object : BroadcastReceiver() {
+            override fun onReceive(c: Context?, intent: Intent?) {
+                when (intent?.action) {
+                    ACTION_ARCHIVE_COMPLETE -> {
+                        busy = false
+                        status = "Archive created."
+                        Toast.makeText(context, "Archive created", Toast.LENGTH_SHORT).show()
+                    }
+                    ACTION_ARCHIVE_ERROR -> {
+                        busy = false
+                        val err = intent.getStringExtra(EXTRA_ERROR_MESSAGE) ?: "An error occurred"
+                        status = err
+                        Toast.makeText(context, err, Toast.LENGTH_LONG).show()
+                    }
+                    ACTION_ARCHIVE_PROGRESS -> { busy = true }
+                }
+            }
+        }
+        val filter = IntentFilter().apply {
+            addAction(ACTION_ARCHIVE_COMPLETE)
+            addAction(ACTION_ARCHIVE_ERROR)
+            addAction(ACTION_ARCHIVE_PROGRESS)
+        }
+        LocalBroadcastManager.getInstance(context).registerReceiver(receiver, filter)
+        onDispose { LocalBroadcastManager.getInstance(context).unregisterReceiver(receiver) }
+    }
+
+    val filePicker = rememberLauncherForActivityResult(ActivityResultContracts.OpenMultipleDocuments()) { uris ->
         val paths = uris.mapNotNull { uri ->
             try { context.contentResolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION) } catch (_: Exception) { }
-            resolveUri(uri)
+            SafPathResolver.resolveUriToPath(context, uri)
         }
         if (paths.isNotEmpty()) files = (files + paths).distinct()
+        else if (uris.isNotEmpty()) Toast.makeText(context, "Could not resolve file path", Toast.LENGTH_SHORT).show()
+    }
+    val folderAddPicker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri: Uri? ->
+        if (uri == null) return@rememberLauncherForActivityResult
+        try { context.contentResolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION) } catch (_: Exception) { }
+        val p = SafPathResolver.treeUriToPath(context, uri)
+        if (p != null && !files.contains(p)) files = files + p
+        else if (p == null) Toast.makeText(context, "Could not resolve folder path", Toast.LENGTH_SHORT).show()
+    }
+    val destDirPicker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri: Uri? ->
+        if (uri == null) return@rememberLauncherForActivityResult
+        try { context.contentResolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION) } catch (_: Exception) { }
+        val p = SafPathResolver.treeUriToPath(context, uri)
+        if (p != null) destCustom = p
+        else Toast.makeText(context, "Could not resolve folder path", Toast.LENGTH_SHORT).show()
+    }
+
+    fun mapZipLevel(v: Int): CompressionLevel = when (v) {
+        0 -> CompressionLevel.NO_COMPRESSION
+        1 -> CompressionLevel.FASTEST
+        2, 3 -> CompressionLevel.FAST
+        4, 5, 6 -> CompressionLevel.NORMAL
+        7, 8 -> CompressionLevel.MAXIMUM
+        9 -> CompressionLevel.ULTRA
+        else -> CompressionLevel.NORMAL
     }
 
     fun start() {
         if (files.isEmpty()) { status = "Add at least one file"; return }
-        // Stage exactly like VIEW CompressFragment: DAO returns the jobId the service reads.
+        val missing = files.filter { !File(it).exists() }
+        if (missing.isNotEmpty()) { status = "Missing: ${missing.first()}"; return }
         val jobId = try { com.toolkits.app.helper.FileOperationsDao(context).addFilesForJob(files) }
         catch (e: Exception) { status = "DB error: ${e.message}"; return }
-        val dest = destDir.ifBlank { "" }
+        val dest = resolveArchiveDest().also { File(it).mkdirs() }
+        val cleanName = archiveName.trim().ifBlank { "Archive" }
+        val isEncrypted = encrypt && password.isNotEmpty()
         val intent = when {
-            format == "zip" && split -> Intent(context, ArchiveSplitZipService::class.java).apply {
-                putExtra(ServiceConstants.EXTRA_JOB_ID, jobId)
-                putExtra(ServiceConstants.EXTRA_ARCHIVE_NAME, "$archiveName.zip")
-                putExtra(ServiceConstants.EXTRA_DESTINATION_PATH, dest)
-                putExtra(ServiceConstants.EXTRA_COMPRESSION_LEVEL, level)
-                putExtra(ServiceConstants.EXTRA_PASSWORD, password)
-                putExtra(ServiceConstants.EXTRA_IS_ENCRYPTED, encrypt)
+            format == "zip" && split -> {
                 val mult = when (splitUnit) { "KB" -> 1024L; "GB" -> 1024L * 1024L * 1024L; else -> 1024L * 1024L }
-                putExtra(ServiceConstants.EXTRA_SPLIT_SIZE, (splitSize.toLongOrNull() ?: 10) * mult)
+                var bytes = (splitSize.toLongOrNull() ?: 10) * mult
+                if (bytes < 65536L) bytes = 65536L // Zip4j minimum 64KB
+                Intent(context, ArchiveSplitZipService::class.java).apply {
+                    putExtra(ServiceConstants.EXTRA_JOB_ID, jobId)
+                    putExtra(ServiceConstants.EXTRA_ARCHIVE_NAME, "$cleanName.zip")
+                    putExtra(ServiceConstants.EXTRA_DESTINATION_PATH, dest)
+                    putExtra(ServiceConstants.EXTRA_PASSWORD, password.ifEmpty { null })
+                    putExtra(ServiceConstants.EXTRA_SPLIT_SIZE, bytes)
+                }
             }
             format == "zip" -> Intent(context, ArchiveZipService::class.java).apply {
                 putExtra(ServiceConstants.EXTRA_JOB_ID, jobId)
-                putExtra(ServiceConstants.EXTRA_ARCHIVE_NAME, "$archiveName.zip")
+                putExtra(ServiceConstants.EXTRA_ARCHIVE_NAME, "$cleanName.zip")
                 putExtra(ServiceConstants.EXTRA_DESTINATION_PATH, dest)
-                putExtra(ServiceConstants.EXTRA_COMPRESSION_LEVEL, level)
-                putExtra(ServiceConstants.EXTRA_PASSWORD, password)
-                putExtra(ServiceConstants.EXTRA_IS_ENCRYPTED, encrypt)
+                putExtra(ServiceConstants.EXTRA_PASSWORD, password.ifEmpty { null })
+                putExtra(ServiceConstants.EXTRA_COMPRESSION_METHOD, CompressionMethod.DEFLATE)
+                putExtra(ServiceConstants.EXTRA_COMPRESSION_LEVEL, mapZipLevel(level))
+                putExtra(ServiceConstants.EXTRA_IS_ENCRYPTED, isEncrypted)
+                putExtra(ServiceConstants.EXTRA_ENCRYPTION_METHOD, EncryptionMethod.AES)
+                putExtra(ServiceConstants.EXTRA_AES_STRENGTH, AesKeyStrength.KEY_STRENGTH_256)
             }
             format == "7z" -> Intent(context, Archive7zService::class.java).apply {
                 putExtra(ServiceConstants.EXTRA_JOB_ID, jobId)
-                putExtra(ServiceConstants.EXTRA_ARCHIVE_NAME, "$archiveName.7z")
+                putExtra(ServiceConstants.EXTRA_ARCHIVE_NAME, "$cleanName.7z")
                 putExtra(ServiceConstants.EXTRA_DESTINATION_PATH, dest)
+                putExtra(ServiceConstants.EXTRA_PASSWORD, password.ifEmpty { null })
                 putExtra(ServiceConstants.EXTRA_COMPRESSION_LEVEL, level)
-                putExtra(ServiceConstants.EXTRA_PASSWORD, password)
                 putExtra(ServiceConstants.EXTRA_SOLID, solid)
+                putExtra(ServiceConstants.EXTRA_THREAD_COUNT, -1)
             }
             else -> Intent(context, ArchiveTarService::class.java).apply {
                 putExtra(ServiceConstants.EXTRA_JOB_ID, jobId)
-                putExtra(ServiceConstants.EXTRA_ARCHIVE_NAME, archiveName)
+                putExtra(ServiceConstants.EXTRA_ARCHIVE_NAME, cleanName)
                 putExtra(ServiceConstants.EXTRA_DESTINATION_PATH, dest)
+                // Match VIEW compression_format_values exactly.
+                val compressionFormat = when (tarVariant) {
+                    "TAR_ONLY" -> "TAR_ONLY"; "gz" -> "gz"; "bzip2" -> "bzip2"
+                    "xz" -> "xz"; "zstd" -> "zstd"; "lzma" -> "lzma"; else -> "TAR_ONLY"
+                }
+                putExtra(ServiceConstants.EXTRA_COMPRESSION_FORMAT, compressionFormat)
                 putExtra(ServiceConstants.EXTRA_COMPRESSION_LEVEL, level)
-                putExtra(ServiceConstants.EXTRA_COMPRESSION_FORMAT, tarVariant)
             }
         }
         if (Build.VERSION.SDK_INT >= 26) ContextCompat.startForegroundService(context, intent) else context.startService(intent)
+        busy = true
         status = "Archive started — see notification."
     }
 
+    val maxLevel = if (format == "tar" && tarVariant != "TAR_ONLY") 22 else 9
+
     Column(Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            OutlinedButton(onClick = { picker.launch(arrayOf("*/*")) }, modifier = Modifier.weight(1f)) { Text("Add files (${files.size})") }
+            OutlinedButton(onClick = { filePicker.launch(arrayOf("*/*")) }, modifier = Modifier.weight(1f)) { Text("Add files (${files.size})") }
+            OutlinedButton(onClick = { folderAddPicker.launch(null) }, modifier = Modifier.weight(1f)) { Text("Add folder") }
             OutlinedButton(onClick = { files = emptyList() }) { Text("Clear") }
         }
         if (files.isNotEmpty()) {
             LazyColumn(modifier = Modifier.fillMaxWidth().weight(1f, fill = false), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 items(files, key = { it }) { f ->
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                        Text(File(f).name, style = MaterialTheme.typography.bodySmall, modifier = Modifier.weight(1f), maxLines = 1)
+                        Column(Modifier.weight(1f)) {
+                            Text(File(f).name, style = MaterialTheme.typography.bodySmall, maxLines = 1)
+                            Text(f, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 2)
+                        }
                         OutlinedButton(onClick = { files = files - f }) { Text("×") }
                     }
                 }
@@ -179,8 +278,19 @@ fun CompressScreen() {
             }
         }
         OutlinedTextField(value = archiveName, onValueChange = { archiveName = it }, label = { Text("Archive name") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
-        OutlinedTextField(value = destDir, onValueChange = { destDir = it }, label = { Text("Save to (blank = auto)") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+        if (!prefsState.hideOutputPath) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
+                OutlinedTextField(
+                    value = destCustom ?: resolveArchiveDest(),
+                    onValueChange = { destCustom = it.ifBlank { null } },
+                    label = { Text("Save to (blank = auto)") },
+                    modifier = Modifier.weight(1f), singleLine = true, maxLines = 2
+                )
+                OutlinedButton(onClick = { destDirPicker.launch(null) }) { Text("Pick") }
+            }
+        }
         Text(status, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        if (busy) LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
         Button(onClick = { start() }, modifier = Modifier.fillMaxWidth()) { Text("Create archive") }
     }
 }

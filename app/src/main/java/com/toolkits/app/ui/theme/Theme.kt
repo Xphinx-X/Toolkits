@@ -9,8 +9,12 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
+import androidx.core.view.WindowCompat
 
 // Full static schemes mirror Toolkits-VIEW values/themes.xml + values-night.
 // Dynamic color (S+) uses content-based seed like App.applyColors; AMOLED blacks out surfaces.
@@ -32,7 +36,7 @@ fun ToolkitsTheme(
     val amoled = themeMode == "amoled" && dark
     val seed = seedFor(colorScheme)
 
-    val scheme = when {
+    val baseScheme = when {
         dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S ->
             if (dark) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         dark -> darkColorScheme(
@@ -107,6 +111,28 @@ fun ToolkitsTheme(
             inverseOnSurface = mdInverseOnSurfaceLight,
             inversePrimary = mdInversePrimaryLight
         )
+    }
+
+    // Zenith-style expressive remap: background/surface collapse onto
+    // surfaceContainerLow so cards float with tonal separation.
+    // Skipped for AMOLED so true blacks are preserved.
+    val scheme = if (amoled) baseScheme else baseScheme.copy(
+        background = baseScheme.surfaceContainerLow,
+        surface = baseScheme.surfaceContainerLow,
+    )
+
+    // Match status/nav bar icons to the theme like Zenith does.
+    val view = LocalView.current
+    if (!view.isInEditMode) {
+        SideEffect {
+            val window = (view.context as? android.app.Activity)?.window ?: return@SideEffect
+            val insetsController = WindowCompat.getInsetsController(window, view)
+            insetsController.isAppearanceLightStatusBars = !dark
+            insetsController.isAppearanceLightNavigationBars = !dark
+            @Suppress("DEPRECATION")
+            window.statusBarColor = Color.Transparent.toArgb()
+            window.navigationBarColor = Color.Transparent.toArgb()
+        }
     }
 
     MaterialExpressiveTheme(colorScheme = scheme, content = content)

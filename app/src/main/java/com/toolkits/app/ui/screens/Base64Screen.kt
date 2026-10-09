@@ -12,6 +12,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -50,16 +51,17 @@ fun Base64Screen(onBack: () -> Unit) {
             Modifier.fillMaxSize().padding(pad).padding(16.dp).verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.Top
         ) {
-            // Mode toggle — wrap content, single selection like MaterialButtonToggleGroup.
+            // Mode toggle — both always clickable (VIEW MaterialButtonToggleGroup).
+            // Never use enabled=false for selection: it looks broken/disabled.
             Row(Modifier.padding(bottom = 16.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedButton(onClick = { encodeMode = true }, enabled = !encodeMode) { Text("Encode") }
-                OutlinedButton(onClick = { encodeMode = false }, enabled = encodeMode) { Text("Decode") }
+                FilterChip(selected = encodeMode, onClick = { encodeMode = true }, label = { Text("Encode") })
+                FilterChip(selected = !encodeMode, onClick = { encodeMode = false }, label = { Text("Decode") })
             }
 
             OutlinedTextField(
                 value = input,
                 onValueChange = { input = it },
-                label = { Text("Input text") },
+                label = { Text(if (encodeMode) "Input text" else "Base64 string") },
                 modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
                 minLines = 4, maxLines = 10,
                 textStyle = MaterialTheme.typography.bodyMedium.copy(fontFamily = FontFamily.Monospace)
@@ -67,10 +69,17 @@ fun Base64Screen(onBack: () -> Unit) {
 
             Button(
                 onClick = {
+                    if (input.isBlank()) {
+                        Toast.makeText(context, "Enter some text first", Toast.LENGTH_SHORT).show()
+                        return@Button
+                    }
                     output = try {
                         if (encodeMode) Base64.encodeToString(input.toByteArray(Charsets.UTF_8), Base64.NO_WRAP)
                         else String(Base64.decode(input.trim(), Base64.DEFAULT), Charsets.UTF_8)
-                    } catch (e: Exception) { "Error: ${e.message}" }
+                    } catch (e: Exception) {
+                        Toast.makeText(context, "Invalid Base64 input", Toast.LENGTH_SHORT).show()
+                        ""
+                    }
                 },
                 modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)
             ) { Text(if (encodeMode) "Encode" else "Decode") }
@@ -88,11 +97,22 @@ fun Base64Screen(onBack: () -> Unit) {
             // End-aligned outlined row: Use as input / Copy / Clear.
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End, verticalAlignment = Alignment.CenterVertically) {
                 OutlinedButton(
-                    onClick = { input = output; encodeMode = !encodeMode },
+                    onClick = {
+                        if (output.isBlank()) {
+                            Toast.makeText(context, "No output to use", Toast.LENGTH_SHORT).show()
+                            return@OutlinedButton
+                        }
+                        input = output
+                        encodeMode = !encodeMode
+                    },
                     modifier = Modifier.padding(end = 8.dp)
                 ) { Text("Use as input") }
                 OutlinedButton(
                     onClick = {
+                        if (output.isBlank()) {
+                            Toast.makeText(context, "Nothing to copy", Toast.LENGTH_SHORT).show()
+                            return@OutlinedButton
+                        }
                         clipboard.setText(AnnotatedString(output))
                         Toast.makeText(context, "Copied", Toast.LENGTH_SHORT).show()
                     },

@@ -29,7 +29,7 @@ fun ToolkitsNavHost(prefs: UserPreferencesRepository) {
                 onSettings = { nav.navigate(Routes.SETTINGS) }
             )
         }
-        composable(Routes.ZIP_TOOLS) { ZipToolsScreen(onBack = { nav.popBackStack() }) }
+        composable(Routes.ZIP_TOOLS) { ZipToolsScreen(onBack = { nav.popBackStack() }, prefs = prefs) }
         composable(Routes.TEXT_HUB) {
             TextToolsHubScreen(
                 onBack = { nav.popBackStack() },

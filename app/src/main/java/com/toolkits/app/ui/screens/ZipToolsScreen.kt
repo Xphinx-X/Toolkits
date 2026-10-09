@@ -17,13 +17,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.toolkits.app.R
+import com.toolkits.app.data.preferences.UserPreferencesRepository
 import com.toolkits.app.ui.components.ToolkitsTopBar
 
 // Mirrors Toolkits-VIEW activity_zip_tools.xml: surface bg, toolbar with back,
 // fixed/fill TabLayout under the bar, pager content below.
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ZipToolsScreen(onBack: () -> Unit) {
+fun ZipToolsScreen(onBack: () -> Unit, prefs: UserPreferencesRepository) {
     var tab by remember { mutableIntStateOf(0) }
     Scaffold(
         topBar = { ToolkitsTopBar(title = stringResource(R.string.tool_zip_tools), onBack = onBack) },
@@ -34,7 +35,7 @@ fun ZipToolsScreen(onBack: () -> Unit) {
                 Tab(selected = tab == 0, onClick = { tab = 0 }, text = { Text(stringResource(R.string.extract)) })
                 Tab(selected = tab == 1, onClick = { tab = 1 }, text = { Text(stringResource(R.string.create_archive)) })
             }
-            if (tab == 0) ExtractScreen() else CompressScreen()
+            if (tab == 0) ExtractScreen(prefs) else CompressScreen(prefs)
         }
     }
 }

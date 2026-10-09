@@ -70,6 +70,9 @@ fun SectionLabel(text: String) {
 // 16dp corners, 0 elevation, 16dp padding, min 88dp height,
 // title TitleMedium onSurface, desc BodySmall onSurfaceVariant,
 // trailing 24dp arrow_forward in onSurfaceVariant.
+// Uses Card(onClick=) so the M3 ripple is bounded to the card shape
+// (a bare Modifier.clickable on a Card lets the ripple bleed outside).
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ToolRowCard(
     title: String,
@@ -79,7 +82,8 @@ fun ToolRowCard(
     onClick: () -> Unit
 ) {
     Card(
-        modifier = Modifier.fillMaxWidth().clickable(onClick = onClick),
+        onClick = onClick,
+        modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
@@ -137,6 +141,7 @@ fun OutlinedSectionCard(content: @Composable () -> Unit) {
 }
 
 // Section header row inside outlined cards: 20dp icon + LabelLarge primary title + expand chevron.
+// Clip + bounded clickable keeps the ripple inside the row.
 @Composable
 fun CardHeaderRow(
     @DrawableRes iconRes: Int,
@@ -145,7 +150,7 @@ fun CardHeaderRow(
     onToggle: () -> Unit
 ) {
     Row(
-        modifier = Modifier.fillMaxWidth().clickable(onClick = onToggle).padding(start = 16.dp, end = 12.dp, top = 12.dp, bottom = 12.dp),
+        modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).clickable(onClick = onToggle).padding(start = 16.dp, end = 12.dp, top = 12.dp, bottom = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
