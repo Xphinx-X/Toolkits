@@ -80,6 +80,7 @@ import com.toolkits.app.ui.components.CardDivider
 import com.toolkits.app.ui.components.CardHeaderRow
 import com.toolkits.app.ui.components.OutlinedSectionCard
 import java.io.File
+import kotlinx.coroutines.flow.first
 import net.lingala.zip4j.model.enums.AesKeyStrength
 import net.lingala.zip4j.model.enums.CompressionLevel
 import net.lingala.zip4j.model.enums.CompressionMethod
@@ -93,6 +94,10 @@ import net.lingala.zip4j.model.enums.EncryptionMethod
 fun CompressScreen(prefs: UserPreferencesRepository) {
     val context = LocalContext.current
     val prefsState by prefs.preferences.collectAsState(initial = ToolkitsPreferences())
+    // Gate hideable cards until DataStore emits: avoids a one-frame flash where
+    // the dest card is visible and then animates away when hide_output_path is on.
+    var prefsReady by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) { prefs.preferences.first(); prefsReady = true }
     var files by remember { mutableStateOf<List<String>>(emptyList()) }
     var filesExpanded by remember { mutableStateOf(true) }
     var removeMode by remember { mutableStateOf(false) }
@@ -406,8 +411,9 @@ fun CompressScreen(prefs: UserPreferencesRepository) {
             Spacer(Modifier.height(12.dp))
         }
 
-        // Destination card — same behaviour as extract tab.
-        AnimatedVisibility(visible = !prefsState.hideOutputPath) {
+        // Destination card — same behaviour as extract tab (GONE, no entry
+        // flicker, when the user enabled hide_output_path).
+        AnimatedVisibility(visible = prefsReady && !prefsState.hideOutputPath) {
             OutlinedSectionCard {
                 Column {
                     Row(

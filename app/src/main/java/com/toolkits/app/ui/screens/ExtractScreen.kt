@@ -9,6 +9,8 @@ import android.os.Build
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
@@ -18,6 +20,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -39,6 +42,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -80,6 +84,7 @@ import java.io.FileInputStream
 import java.io.RandomAccessFile
 import java.util.Date
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.lingala.zip4j.ZipFile
@@ -99,6 +104,10 @@ fun ExtractScreen(prefs: UserPreferencesRepository) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val prefsState by prefs.preferences.collectAsState(initial = ToolkitsPreferences())
+    // Gate hideable cards until DataStore emits: avoids a one-frame flash where
+    // the dest card is visible and then animates away when hide_output_path is on.
+    var prefsReady by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) { prefs.preferences.first(); prefsReady = true }
     var archivePath by remember { mutableStateOf("") }
     var destCustom by remember { mutableStateOf<String?>(null) }
     var destExpanded by remember { mutableStateOf(false) }
@@ -333,7 +342,7 @@ fun ExtractScreen(prefs: UserPreferencesRepository) {
 
         // Contents card — hidden for non-archives / empty.
         val visibleItems = items.filter { it.path.isNotBlank() || it.name.startsWith("(") }
-        androidx.compose.animation.AnimatedVisibility(visible = visibleItems.isNotEmpty()) {
+        AnimatedVisibility(visible = visibleItems.isNotEmpty()) {
             OutlinedSectionCard {
                 Column {
                     CardHeaderRow(
@@ -342,10 +351,10 @@ fun ExtractScreen(prefs: UserPreferencesRepository) {
                         expanded = contentsExpanded,
                         onToggle = { contentsExpanded = !contentsExpanded }
                     )
-                    androidx.compose.animation.AnimatedVisibility(visible = contentsExpanded) {
+                    AnimatedVisibility(visible = contentsExpanded) {
                         Column {
                         CardDivider()
-                        LazyColumn(modifier = Modifier.fillMaxWidth().height(360.dp).padding(top = 8.dp, bottom = 12.dp)) {
+                        LazyColumn(modifier = Modifier.fillMaxWidth().heightIn(max = 360.dp).padding(top = 8.dp, bottom = 12.dp)) {
                             items(visibleItems, key = { it.path.ifBlank { it.name } }) { item ->
                                 val selectable = item.path.isNotBlank()
                                 Row(
@@ -408,8 +417,9 @@ fun ExtractScreen(prefs: UserPreferencesRepository) {
             Spacer(Modifier.height(12.dp))
         }
 
-        // Destination card — hidden when the user enabled hide_output_path.
-        if (!prefsState.hideOutputPath) {
+        // Destination card — same AnimatedVisibility behaviour as the compress tab.
+        // Hidden (GONE, no entry flicker) when the user enabled hide_output_path.
+        AnimatedVisibility(visible = prefsReady && !prefsState.hideOutputPath) {
             OutlinedSectionCard {
                 Column {
                     Row(
@@ -429,7 +439,7 @@ fun ExtractScreen(prefs: UserPreferencesRepository) {
                             style = MaterialTheme.typography.labelMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
-                        androidx.compose.animation.AnimatedContent(targetState = destExpanded, label = "destChevron") { ex ->
+                        AnimatedContent(targetState = destExpanded, label = "destChevron") { ex ->
                             Icon(
                                 painterResource(if (ex) R.drawable.ic_chevron_up else R.drawable.ic_expand_more),
                                 contentDescription = null,
@@ -437,7 +447,7 @@ fun ExtractScreen(prefs: UserPreferencesRepository) {
                             )
                         }
                     }
-                    androidx.compose.animation.AnimatedVisibility(visible = destExpanded) {
+                    AnimatedVisibility(visible = destExpanded) {
                         if (!destEditing) {
                             Row(
                                 Modifier.fillMaxWidth()
