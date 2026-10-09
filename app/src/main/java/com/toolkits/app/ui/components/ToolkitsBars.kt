@@ -88,7 +88,7 @@ fun ToolRowCard(
         onClick = onClick,
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Row(
@@ -131,13 +131,14 @@ fun ToolRowCard(
 
 // Outlined section card mirrors Widget.ToolKits.CardView.Outlined:
 // 16dp corners, 0 elevation, 1dp outlineVariant stroke.
-// animateContentSize gives Zenith-like expand/collapse motion.
+// Fill is surfaceContainer (one step above the expressive background) so the
+// card never blends into the page; animateContentSize gives expand motion.
 @Composable
 fun OutlinedSectionCard(content: @Composable () -> Unit) {
     OutlinedCard(
         modifier = Modifier.fillMaxWidth().animateContentSize(),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.outlinedCardColors(containerColor = MaterialTheme.colorScheme.surface),
+        colors = CardDefaults.outlinedCardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
         border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
     ) {
         content()

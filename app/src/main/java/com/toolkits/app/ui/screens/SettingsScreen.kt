@@ -97,16 +97,10 @@ fun SettingsScreen(onBack: () -> Unit, prefs: UserPreferencesRepository) {
                 .padding(horizontal = 16.dp, vertical = 8.dp),
             verticalArrangement = Arrangement.spacedBy(0.dp)
         ) {
-            SectionLabel("Appearance")
+            SectionLabel(stringResource(R.string.pref_appearance))
             Spacer16()
-            Card(
-                modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.outlinedCardColors(containerColor = MaterialTheme.colorScheme.surface),
-                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
-                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-            ) {
-                Column {
+            com.toolkits.app.ui.components.OutlinedSectionCard {
+                Column(modifier = Modifier.padding(bottom = 16.dp)) {
                     // Color scheme title + desc + swatch row with labels.
                     // Tapping a seed selects it AND turns dynamic off (VIEW behavior);
                     // swatches dim while dynamic is on since the seed is inactive.
