@@ -76,7 +76,7 @@ fun ToolkitsNavHost(
             FileEditorScreen(onBack = { nav.popBackStack() }, filePath = backStack.arguments?.getString("path").orEmpty())
         }
         composable(Routes.PROJECTS) {
-            ProjectsScreen(onBack = { nav.popBackStack() }, onOpenEditor = { path -> nav.navigate(Routes.fileEditor(path)) })
+            ProjectsScreen(onBack = { nav.popBackStack() }, onOpenEditor = { path -> nav.navigate(Routes.fileEditor(path)) }, prefs = prefs)
         }
         composable(Routes.FANCY) { FancyTextScreen(onBack = { nav.popBackStack() }) }
         composable(Routes.SETTINGS) { SettingsScreen(onBack = { nav.popBackStack() }, prefs = prefs) }
